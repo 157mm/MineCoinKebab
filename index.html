@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⛏ Notre Serveur Minecraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#111;
+    font-family:'VT323',monospace;
+    color:#e8e8e8;
+    min-height:100vh;
+    padding:1.5rem 1rem 3rem;
+  }
+  .site-wrapper{max-width:780px;margin:0 auto}
+
+  /* HEADER */
+  .header{
+    text-align:center;
+    padding:2.5rem 1.5rem 2rem;
+    background:linear-gradient(180deg,#0d2a3f 0%,#1a3a5c 50%,#2d5a8a 100%);
+    border:3px solid #4a7ab5;
+    border-radius:4px;
+    margin-bottom:1.5rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::before{
+    content:'';position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(255,255,255,0.025) 32px),
+      repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,255,255,0.025) 32px);
+    pointer-events:none;
+  }
+  .stars{position:absolute;inset:0;pointer-events:none}
+  .star{
+    position:absolute;width:2px;height:2px;
+    background:#fff;border-radius:50%;
+    animation:twinkle 3s infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+  .header h1{
+    font-family:'Press Start 2P',monospace;
+    font-size:clamp(1rem,3vw,1.5rem);
+    color:#f0c040;
+    text-shadow:3px 3px #8b6000,0 0 24px rgba(240,192,64,.35);
+    line-height:1.7;
+    position:relative;
+  }
+  .header p{
+    font-size:1.25rem;color:#a8c8e8;
+    margin-top:.75rem;position:relative;
+  }
+
+  /* GLOBAL PROGRESS */
+  .progress-global{
+    background:#1a1a1a;border:2px solid #333;border-radius:4px;
+    padding:1rem 1.25rem;margin-bottom:1.5rem;
+    display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  }
+  .progress-global span{font-size:1.1rem;color:#888;white-space:nowrap}
+  .bar-track{
+    flex:1;min-width:120px;height:20px;
+    background:#111;border:2px solid #2e2e2e;border-radius:2px;overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    background:linear-gradient(90deg,#5a8a3c,#8bc34a);
+    transition:width .5s ease;
+  }
+  .progress-count{font-size:1.2rem;color:#f0c040;white-space:nowrap;font-weight:bold}
+
+  /* CATEGORY */
+  .category{
+    border:2px solid #2e2e2e;border-radius:4px;
+    margin-bottom:.9rem;overflow:hidden;
+  }
+  .cat-mini-bar{height:4px;background:#111}
+  .cat-mini-fill{height:100%;transition:width .4s ease}
+  .cat-overworld  .cat-mini-fill{background:#5a8a3c}
+  .cat-village    .cat-mini-fill{background:#c49a3c}
+  .cat-nether     .cat-mini-fill{background:#d05a2a}
+  .cat-end        .cat-mini-fill{background:#8a5aad}
+  .cat-usine      .cat-mini-fill{background:#7a7a7a}
+
+  .cat-header{
+    display:flex;align-items:center;gap:.75rem;
+    padding:.8rem 1rem;cursor:pointer;user-select:none;
+    transition:filter .15s;
+  }
+  .cat-header:hover{filter:brightness(1.2)}
+  .cat-overworld .cat-header{background:linear-gradient(135deg,#2d4a1e,#3d6a28)}
+  .cat-village   .cat-header{background:linear-gradient(135deg,#4a3a1e,#6a5228)}
+  .cat-nether    .cat-header{background:linear-gradient(135deg,#4a1a1a,#7a2a2a)}
+  .cat-end       .cat-header{background:linear-gradient(135deg,#1a0a2e,#2e1a4e)}
+  .cat-usine     .cat-header{background:linear-gradient(135deg,#252525,#404040)}
+
+  .cat-icon{font-size:1.6rem;width:30px;text-align:center;flex-shrink:0}
+  .cat-title{
+    font-family:'Press Start 2P',monospace;
+    font-size:clamp(.5rem,1.5vw,.65rem);
+    flex:1;line-height:1.6;
+  }
+  .cat-progress{font-size:1.1rem;color:rgba(255,255,255,.55);white-space:nowrap}
+  .cat-chevron{font-size:1.3rem;color:rgba(255,255,255,.4);transition:transform .2s;flex-shrink:0}
+  .cat-chevron.open{transform:rotate(180deg)}
+
+  /* OBJECTIVES */
+  .cat-body{display:none;background:#0e0e0e;padding:.4rem 0}
+  .cat-body.open{display:block}
+
+  .objective{
+    display:flex;align-items:flex-start;gap:.8rem;
+    padding:.55rem 1rem;cursor:pointer;transition:background .1s;
+  }
+  .objective:hover{background:#1a1a1a}
+  .obj-check{
+    width:22px;height:22px;flex-shrink:0;
+    border:2px solid #444;border-radius:2px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;margin-top:2px;transition:all .15s;
+  }
+  .objective.done .obj-check{background:#5a8a3c;border-color:#5a8a3c;color:#fff}
+  .obj-label{font-size:1.15rem;line-height:1.4;transition:color .15s}
+  .objective.done .obj-label{color:#454545;text-decoration:line-through}
+  .obj-sub{font-size:.9rem;color:#555;margin-top:3px}
+
+  /* RESET */
+  .reset-btn{
+    display:block;margin:1.25rem auto 0;
+    padding:.55rem 1.75rem;
+    font-family:'VT323',monospace;font-size:1.1rem;
+    background:transparent;border:2px solid #333;color:#555;
+    border-radius:2px;cursor:pointer;transition:all .15s;
+    letter-spacing:1px;
+  }
+  .reset-btn:hover{border-color:#666;color:#999;background:#1a1a1a}
+
+  /* FOOTER */
+  .footer{text-align:center;margin-top:2rem;font-size:.95rem;color:#333}
+</style>
+</head>
+<body>
+<div class="site-wrapper">
+
+  <div class="header">
+    <div class="stars" id="stars"></div>
+    <h1>⛏ NOTRE SERVEUR<br>MINECRAFT</h1>
+    <p>Progression des objectifs communs</p>
+  </div>
+
+  <div class="progress-global">
+    <span>Progression globale</span>
+    <div class="bar-track"><div class="bar-fill" id="global-bar" style="width:0%"></div></div>
+    <span class="progress-count" id="global-count">0 / 0 — 0%</span>
+  </div>
+
+  <div id="categories"></div>
+
+  <button class="reset-btn" onclick="resetAll()">↺ Tout réinitialiser</button>
+  <p class="footer">La progression est sauvegardée dans le navigateur de chaque joueur.</p>
+</div>
+
+<script>
+const DATA = [
+  {
+    id:'overworld', cls:'cat-overworld', icon:'🌍',
+    title:"Exploration de l'OverWorld",
+    objectives:[
+      {id:'o1', label:'Coordonnées de tous les biomes (chemin dans le Nether)', sub:'Cerisier, BadLands, Désert, Jungle, Île Champi, Pale Garden, Océan chaud, Marais…'},
+      {id:'o2', label:'Faire une Trial Chamber'},
+      {id:'o3', label:'Faire une Ancienne Cité'},
+      {id:'o4', label:'Faire un Manoir'},
+      {id:'o5', label:'Faire un Raid'},
+    ]
+  },
+  {
+    id:'village', cls:'cat-village', icon:'🏘️',
+    title:'Village de la Communauté',
+    objectives:[
+      {id:'v1', label:'Chacun sa maison'},
+      {id:'v2', label:'Champs'},
+      {id:'v3', label:'Élevages'},
+      {id:'v4', label:'Aquarium à Axolotl'},
+    ]
+  },
+  {
+    id:'nether', cls:'cat-nether', icon:'🔥',
+    title:'Dans le Nether',
+    objectives:[
+      {id:'n1', label:'Faire un Bastion'},
+      {id:'n2', label:'Hub dans le Nether'},
+    ]
+  },
+  {
+    id:'end', cls:'cat-end', icon:'🐉',
+    title:"Dans l'End",
+    objectives:[
+      {id:'e1', label:'Faire le Dragon'},
+      {id:'e2', label:'Chacun ses élytres'},
+      {id:'e3', label:'Faire le Wither'},
+    ]
+  },
+  {
+    id:'usine', cls:'cat-usine', icon:'⚙️',
+    title:'Usines',
+    objectives:[
+      {id:'u1',  label:'Usine à Bois'},
+      {id:'u2',  label:'Usine à Mob'},
+      {id:'u3',  label:'Usine à Creeper'},
+      {id:'u4',  label:'Usine à Canne à sucre'},
+      {id:'u5',  label:'Usine à Cobblestone'},
+      {id:'u6',  label:'Usine à Fer'},
+      {id:'u7',  label:'Usine à Miel'},
+      {id:'u8',  label:'Usine à Wither Squelette'},
+      {id:'u9',  label:'Usine à Or'},
+      {id:'u10', label:'Usine à XP'},
+      {id:'u11', label:'Usine à Potion'},
+      {id:'u12', label:'Usine à Slime'},
+    ]
+  }
+];
+
+let state = {};
+
+function loadState() {
+  try {
+    const stored = localStorage.getItem('mc_obj');
+    if (stored && typeof stored === 'string') {
+      const parsed = JSON.parse(stored);
+      if (typeof parsed === 'object' && parsed !== null) {
+        state = parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Erreur au chargement:', e);
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem('mc_obj', JSON.stringify(state));
+  } catch (e) {
+    console.error('Erreur à la sauvegarde:', e);
+  }
+}
+
+function toggle(id) {
+  state[id] = !state[id];
+  save();
+  render();
+}
+
+function toggleCat(id) {
+  state['__open_'+id] = state['__open_'+id] === false ? true : false;
+  save();
+  render();
+}
+
+function resetAll() {
+  if (confirm('Réinitialiser tous les objectifs ?')) {
+    state = {};
+    save();
+    render();
+  }
+}
+
+function render() {
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  let totalDone = 0, totalAll = 0;
+
+  DATA.forEach(cat => {
+    const done = cat.objectives.filter(o => state[o.id]).length;
+    const all = cat.objectives.length;
+    totalDone += done;
+    totalAll += all;
+    const pct = all > 0 ? Math.round(done / all * 100) : 0;
+    const isOpen = state['__open_' + cat.id] !== false;
+
+    const div = document.createElement('div');
+    div.className = 'category ' + cat.cls;
+    div.innerHTML = `
+      <div class="cat-mini-bar"><div class="cat-mini-fill" style="width:${pct}%"></div></div>
+      <div class="cat-header" onclick="toggleCat('${cat.id}')">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-title">${cat.title}</span>
+        <span class="cat-progress">${done}/${all}</span>
+        <span class="cat-chevron ${isOpen ? 'open' : ''}">▾</span>
+      </div>
+      <div class="cat-body ${isOpen ? 'open' : ''}">
+        ${cat.objectives.map(o => `
+          <div class="objective ${state[o.id] ? 'done' : ''}" onclick="toggle('${o.id}')">
+            <div class="obj-check">${state[o.id] ? '✔' : ''}</div>
+            <div>
+              <div class="obj-label">${o.label}</div>
+              ${o.sub ? `<div class="obj-sub">${o.sub}</div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  const pct = totalAll > 0 ? Math.round(totalDone / totalAll * 100) : 0;
+  document.getElementById('global-bar').style.width = pct + '%';
+  document.getElementById('global-count').textContent = `${totalDone} / ${totalAll} — ${pct}%`;
+}
+
+function createStars() {
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const delay = Math.random() * 3;
+    const duration = 2 + Math.random() * 2;
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = delay + 's';
+    s.style.animationDuration = duration + 's';
+    starsEl.appendChild(s);
+  }
+}
+
+loadState();
+createStars();
+render();
+</script>
+</body>
+</html>
