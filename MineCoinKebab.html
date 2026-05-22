@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com">
 <title>⛏ MineCoinKebab ⛏</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -225,32 +226,61 @@ const DATA = [
 ];
 
 let state = {};
-try { const s = localStorage.getItem('mc_obj'); if(s) state = JSON.parse(s); } catch(e){}
 
-function save(){ try{ localStorage.setItem('mc_obj', JSON.stringify(state)); }catch(e){} }
+function loadState() {
+  try {
+    const stored = localStorage.getItem('mc_obj');
+    if (stored && typeof stored === 'string') {
+      const parsed = JSON.parse(stored);
+      if (typeof parsed === 'object' && parsed !== null) {
+        state = parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Erreur au chargement:', e);
+  }
+}
 
-function toggle(id){ state[id] = !state[id]; save(); render(); }
+function save() {
+  try {
+    localStorage.setItem('mc_obj', JSON.stringify(state));
+  } catch (e) {
+    console.error('Erreur à la sauvegarde:', e);
+  }
+}
 
-function toggleCat(id){
+function toggle(id) {
+  state[id] = !state[id];
+  save();
+  render();
+}
+
+function toggleCat(id) {
   state['__open_'+id] = state['__open_'+id] === false ? true : false;
-  save(); render();
+  save();
+  render();
 }
 
-function resetAll(){
-  if(confirm('Réinitialiser tous les objectifs ?')){ state={}; save(); render(); }
+function resetAll() {
+  if (confirm('Réinitialiser tous les objectifs ?')) {
+    state = {};
+    save();
+    render();
+  }
 }
 
-function render(){
+function render() {
   const container = document.getElementById('categories');
   container.innerHTML = '';
-  let totalDone=0, totalAll=0;
+  let totalDone = 0, totalAll = 0;
 
   DATA.forEach(cat => {
     const done = cat.objectives.filter(o => state[o.id]).length;
-    const all  = cat.objectives.length;
-    totalDone += done; totalAll += all;
-    const pct   = all > 0 ? Math.round(done/all*100) : 0;
-    const isOpen = state['__open_'+cat.id] !== false;
+    const all = cat.objectives.length;
+    totalDone += done;
+    totalAll += all;
+    const pct = all > 0 ? Math.round(done / all * 100) : 0;
+    const isOpen = state['__open_' + cat.id] !== false;
 
     const div = document.createElement('div');
     div.className = 'category ' + cat.cls;
@@ -260,12 +290,12 @@ function render(){
         <span class="cat-icon">${cat.icon}</span>
         <span class="cat-title">${cat.title}</span>
         <span class="cat-progress">${done}/${all}</span>
-        <span class="cat-chevron ${isOpen?'open':''}">▾</span>
+        <span class="cat-chevron ${isOpen ? 'open' : ''}">▾</span>
       </div>
-      <div class="cat-body ${isOpen?'open':''}">
+      <div class="cat-body ${isOpen ? 'open' : ''}">
         ${cat.objectives.map(o => `
-          <div class="objective ${state[o.id]?'done':''}" onclick="toggle('${o.id}')">
-            <div class="obj-check">${state[o.id]?'✔':''}</div>
+          <div class="objective ${state[o.id] ? 'done' : ''}" onclick="toggle('${o.id}')">
+            <div class="obj-check">${state[o.id] ? '✔' : ''}</div>
             <div>
               <div class="obj-label">${o.label}</div>
               ${o.sub ? `<div class="obj-sub">${o.sub}</div>` : ''}
@@ -277,20 +307,28 @@ function render(){
     container.appendChild(div);
   });
 
-  const pct = totalAll > 0 ? Math.round(totalDone/totalAll*100) : 0;
+  const pct = totalAll > 0 ? Math.round(totalDone / totalAll * 100) : 0;
   document.getElementById('global-bar').style.width = pct + '%';
   document.getElementById('global-count').textContent = `${totalDone} / ${totalAll} — ${pct}%`;
 }
 
-// Étoiles décoratives
-const starsEl = document.getElementById('stars');
-for(let i=0; i<30; i++){
-  const s = document.createElement('div');
-  s.className = 'star';
-  s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*2}s`;
-  starsEl.appendChild(s);
+function createStars() {
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const delay = Math.random() * 3;
+    const duration = 2 + Math.random() * 2;
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = delay + 's';
+    s.style.animationDuration = duration + 's';
+    starsEl.appendChild(s);
+  }
 }
 
+loadState();
+createStars();
 render();
 </script>
 </body>
